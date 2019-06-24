@@ -1,0 +1,13 @@
+apiCersion: v1
+appVersion: 3.0.0
+description: A Helm chart to deploy Grey Matter Docs-test
+name: docs-test
+version: 1.0.1
+icon: 
+maintainers:
+    - name: Decipher Technology Studios Engineering
+      email: engineering@deciphernow.com
+      website: deciphernow.com
+keywords:
+    - Grey Matter
+    - service mesh

@@ -104,7 +104,15 @@ catalog:
       owner: 'Decipher'
       version: "{{ $.Values.global.documentation.version | trunc 3 }}"
       zookeeper_announcement_point: "/services/documentation/{{ $.Values.global.documentation.version }}/metrics"
-   
+    
+    service_8:
+      capability: 'Grey Matter'
+      documentation: ''
+      name: 'Grey Matter Docs test'
+      owner: 'Decipher'
+      version: "1.0"
+      zookeeper_announcement_point: '/services/catalog-sidecar-test/1.0/metrics'
+      
 sidecar:
   version: 0.7.1
   image: "docker.production.deciphernow.com/deciphernow/gm-proxy:{{ $.Values.sidecar.version }}"

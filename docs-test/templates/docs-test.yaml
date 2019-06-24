@@ -1,0 +1,81 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "docs-{{ .Release.Name }}-connection-test-sidecar"
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: "docs-{{ .Release.Name }}-connection-test-sidecar"
+      deployment: "docs-{{ .Release.Name }}-connection-test-sidecar"
+  template:
+    metadata:
+      labels:
+        app: "docs-{{ .Release.Name }}-connection-test-sidecar"
+        deployment: "docs-{{ .Release.Name }}-connection-test-sidecar"
+    spec:
+      containers:
+      - name: docs-{{ .Release.Name }}-connections-test-sidecar
+        image: "centos"
+        command: ["sh", "-c", "curl --location --cacert /etc/test/certs/ca.crt --cert /etc/test/certs/server.crt --key /etc/test/certs/server.key --request GET \"https://localhost:9080/services/documentation/3.0.0/\" -vk"]
+        volumeMounts:
+          - name: sidecar
+            mountPath: /etc/test/certs/
+        ports:
+          - containerPort: 9443
+            name: http  
+
+
+      - name: sidecar
+        image: {{ .Values.sidecar.image | quote }}
+        imagePullPolicy: Always
+        env:
+        {{- range $envvar := .Values.sidecar.envvars }}
+        {{- $envName := $envvar.name | upper | replace "." "_" | replace "-" "_" }}
+        {{- if eq $envvar.type "secret" }}
+        - name: {{ $envName }}
+          valueFrom:
+            secretKeyRef:
+              name: {{ $envvar.secret }}
+              key: {{ $envvar.key }}
+        {{- else if eq $envvar.type "value" }}
+        - name: {{ $envName }}
+          value: {{ tpl $envvar.value $ | quote }}
+        {{- end }}
+        {{- end  }}     
+        - name: XDS_CLUSTER
+          value: {{ .Values.global.xds.cluster | quote }}
+        - name: XDS_HOST
+          value: "xds.{{ .Release.Namespace }}.svc.cluster.local"
+        - name: XDS_PORT
+          value: {{ .Values.global.xds.port | quote }}
+        - name: ZK_ADDRS
+          value: {{ template "greymatter.exhibitor.address" . }}
+        - name: ZK_ANNOUNCE_PATH
+          value: {{ .Values.test.catalog_sidecar.zk_announce_path | quote }}
+
+        ports:
+          - containerPort: 8080
+            name: http-port
+            protocol: TCP
+          - containerPort: 8443
+            name: https-port
+            protocol: TCP
+          - containerPort: 8081
+            name: metrics
+            protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/terminiation-log
+        terminationMessagePolicy: File
+        volumeMounts:
+          - name: sidecar
+            mountPath: /etc/proxy/tls/sidecar
+      dnsPolicy: ClusterFirst
+      imagePullSecrets:
+        - name: docker.secret
+      volumes:
+        - name: sidecar
+          secret:
+            secretName: sidecar
+

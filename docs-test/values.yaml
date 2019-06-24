@@ -1,30 +1,13 @@
-
 global:
   environment: kubernetes
   domain: 
   route_url_name: 
-  remove_namespace_from_url: false
-  catalog:
-    version: 0.3.6
-  dashboard:
-    version: latest
-  data:
-    version: 0.2.3
-  documentation:
-    version: 3.0.0
-  edge:
-    version: 0.7.1
+  remove_namespace_from_url: ''
   exhibitor:
     replicas: 1
-    version: 
-  jwt:
-    version: 0.2.0
-  slo:
-    version: 0.4.0
   xds:
-    cluster: greymatter
     port: 18000
-    version: 0.2.6
+    cluster: greymatter
 
 test:
   catalog_sidecar:
@@ -75,11 +58,12 @@ sidecar:
   - type: value
     name: service_host
     value: "127.0.0.1"
-  # Set this to true if you are attempting to deploy Catalog by itself.  
-  # Ideally, catalog is deployed as a dependency to Grey Matter, which creates the 
+    
+  # Set this to true if you are attempting to deploy Catalog by itself.
+  # Ideally, catalog is deployed as a dependency to Grey Matter, which creates the
   # sidecar secret, but if individual testing is being done, the sidecar secret will
-  # need to be created.  
-  create_sidecar_secret: true
+  # need to be created.
+  create_sidecar_secret: false
   certificates:
     name: sidecar
     ca: |-
