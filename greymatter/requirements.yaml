@@ -35,3 +35,7 @@ dependencies:
   version: "1.0.1"
   repository: "https://nexus.production.deciphernow.com/repository/helm-hosted"
 
+- name: docs-test
+  version: "1.0.1"
+  repository: "file://../docs-test"
+
