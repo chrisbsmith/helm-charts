@@ -1,0 +1,126 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.service-validation-manager.name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: {{ .Values.service-validation-manager.name }}
+      deployment: {{ .Values.service-validation-manager.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.service-validation-manager.name }}
+        deployment: {{ .Values.service-validation-manager.name }}
+    spec:
+      containers:
+        - name: {{ .Values.service-validation-manager.name }}
+          image: {{ .Values.service-validation-manager.image | quote }}
+          imagePullPolicy: {{ .Values.service-validation-manager.imagePullPolicy }}
+          resources:
+{{ toYaml .Values.service-validation-manager | indent 12}}
+          env:
+          - name: POSTGRESQL_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.postgres.credentials.secret_name }}
+                key: username
+          - name: POSTGRESQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.postgres.credentials.secret_name }}
+                key: password
+          - name: POSTGRESQL_DATABASE
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.postgres.credentials.secret_name }}
+                key: database 
+      {{- range $envvar := .Values.service-validation-manager.envvars }}
+        {{- $envName := $envvar.name | upper | replace "." "_" | replace "-" "_" }}
+          {{- if eq $envvar.type "secret" }}
+          - name: {{ $envName }}
+            valueFrom:
+              secretKeyRef:
+                name: {{ $envvar.secret }}
+                key: {{ $envvar.key }}
+          {{- else if eq $envvar.type "value" }}
+          - name: {{ $envName }}
+            value: {{ tpl $envvar.value $ | quote }}
+          {{- end }}
+      {{- end  }} 
+          # {{- if .Values.postgres.ssl.enabled  }}
+          # - name: "SSL_ENABLED"
+          #   value: {{ .Values.postgres.ssl.enabled | quote }}
+          # - name: SSL_SERVER_CA
+          #   value: "{{ .Values.postgres.ssl.mount_path }}/ca.pem"
+          # - name: SSL_SERVER_CERT
+          #   value: "{{ .Values.postgres.ssl.mount_path }}/postgres.crt"
+          # - name: SSL_SERVER_KEY
+          #   value: "{{ .Values.postgres.ssl.mount_path }}/postgres.key"
+          # volumeMounts:
+          # - name: certs
+          #   mountPath: {{ .Values.postgres.ssl.mount_path | quote }}
+          # {{- end }}
+          ports:
+            - name: internal
+              containerPort: 1337
+
+
+        - name: sidecar
+          image: {{ .Values.sidecar.image | quote }}
+          imagePullPolicy: Always
+          env:
+      {{- range $envvar := .Values.sidecar.envvars }}
+        {{- $envName := $envvar.name | upper | replace "." "_" | replace "-" "_" }}
+          {{- if eq $envvar.type "secret" }}
+          - name: {{ $envName }}
+            valueFrom:
+              secretKeyRef:
+                name: {{ $envvar.secret }}
+                key: {{ $envvar.key }}
+          {{- else if eq $envvar.type "value" }}
+          - name: {{ $envName }}
+            value: {{ tpl $envvar.value $ | quote }}
+          {{- end }}
+      {{- end  }} 
+          - name: XDS_CLUSTER
+            value: {{ .Values.global.xds.cluster | quote }}
+          - name: XDS_HOST
+            value: "xds.{{ .Release.Namespace }}.svc.cluster.local"
+          - name: XDS_PORT
+            value: {{ .Values.global.xds.port | quote }}
+          - name: ZK_ADDRS
+            value: {{ template "greymatter.exhibitor.address" . }}
+          - name: ZK_ANNOUNCE_PATH
+            value: {{ .Values.service-validation-manager.base_path | quote }}
+
+          ports:
+            - containerPort: 8080
+              name: http-port
+              protocol: TCP
+            - containerPort: 8443
+              name: https-port
+              protocol: TCP
+            - containerPort: 8081
+              name: metrics
+              protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+            - name: sidecar
+              mountPath: /etc/proxy/tls/sidecar
+      dnsPolicy: ClusterFirst
+      imagePullSecrets:
+        - name: docker.secret
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: sidecar
+          secret:
+            secretName: sidecar
