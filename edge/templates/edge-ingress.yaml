@@ -31,7 +31,12 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   rules:
-  - tcp:
+  - host: {{ if .Values.global.remove_namespace_from_url -}}
+    {{ tpl .Values.ingress_config.custom_url . }}
+  {{- else }}
+    {{- tpl .Values.ingress_config.default_url . }}
+  {{- end }}
+    tcp:
       port: '443'
       backend:
         serviceName: edge

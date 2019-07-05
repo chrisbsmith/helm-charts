@@ -42,15 +42,23 @@ In Kubernetes environments however, the user must take a few additional steps to
 Initially, we used [`ingress-nginx`](https://github.com/kubernetes/ingress-nginx), which is probably the most commonly known Kubernetes ingress controller.
 
 However, it for some reason still tried to decode and convert the TLS certs even when ["SSL passthrough"](https://kubernetes.github.io/ingress-nginx/user-guide/tls/#ssl-passthrough) was enabled.
-This was giving us some pretty cryptic errors, so we decided to just use a L4 TCP proxy that would proxy the entire connection and wouldn't care about TLS. We decided on Voyager, a Kubernetes Ingress controller built on top of HAProxy, mainly for its ease of use and existing integrations with major cloud providers. These integrations are what allow the automatic provisioning of real cloud load balancers from the Kubernetes created `LoadBalancer` resources. 
+This was giving us some pretty cryptic errors, so we decided to just use a L4 TCP proxy that would proxy the entire connection and wouldn't care about TLS. We decided on Voyager, a Kubernetes Ingress controller built on top of HAProxy, mainly for its ease of use and existing integrations with major cloud providers. These integrations are what allow the automatic provisioning of real cloud load balancers from the Kubernetes created `LoadBalancer` resources.
 
 We have linked Voyager as a dependency of the `greymatter` helm chart, so it can be configured from your `custom.yaml` file, but can also be installed manually if you would like more flexibility, or to have it be managed as a separate helm release.
 
-We recommend however that you simply configure your `custom.yaml` with your `cloudProvider` and use it as a managed Helm dependency.
+It is undeniably simpler just to configure your `custom.yaml` with your `cloudProvider` and use it as a managed Helm dependency.
+
+Howver, due to how both Voyager [creates its CRDs](https://github.com/appscode/voyager/blob/master/pkg/operator/operator.go#L106-L114) we are not able to use an existing [solution](https://github.com/helm/helm/issues/2994#issuecomment-420309837) for validating Helm charts with their own CRDs in them, which would allow Voyager and Grey Matter to be contained in the same Helm release.
+
+See [this issue](https://github.com/appscode/voyager/issues/1415) for details. Currently, Voyager creates its CRDs in the `voyager-operator` pod which means that it is not supported to use it as a subchart from the first install.
+
+However, there's another option if you _really_ want to use Voyager as a subchart. Follow the manual installation steps below, and then delete the `voyager-operator` release. Then you will be able to install it as a subchart. Deleting a release even with `--purge` does not delete [CRDs created with hooks](https://github.com/istio/istio/issues/7688#issuecomment-442199961) or [resources utilizing Helm hooks](https://github.com/helm/helm/blob/49fc49ecb82a8cd9cbb9d8ba7ce85db2fc355893/docs/charts_hooks.md#hook-resources-are-not-managed-with-corresponding-releases). Since the Voyager CRDs are created by the operator, they are not deleted. The `ValidatingWebhookConfiguration` admission controller is also not deleted b/c they use hooks. Additionally, for some reason, Helm does not delete the `APIService` resources.
+
+This means that all of the basic CRDs are then still present after the release is deleted. This allows you to re-install the rest of the release using the subchart, and it will be managed in one release. However, we recommend you use separate releases just to keep things separate.
 
 ### Manual installation
-To install Voyager in your environment using helm, set the `$PROVIDER` environment variable to one of the [supported options](https://appscode.com/products/voyager/7.1.1/setup/install/#using-script) (includes acs, aks, aws, azure, baremetal, gce, gke, minikube, and a few more) and run the following commands: 
 
+To install Voyager in your environment using helm, set the `$PROVIDER` environment variable to one of the [supported options](https://appscode.com/products/voyager/7.1.1/setup/install/#using-script) (includes acs, aks, aws, azure, baremetal, gce, gke, minikube, and a few more) and run the following commands:
 
 ```sh
 helm repo add appscode https://charts.appscode.com/stable/
