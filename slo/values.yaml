@@ -20,6 +20,29 @@ slo:
     requests:
       cpu: 100m
       memory: 128Mi
+  envvars:
+  - type: value
+    name: database_uri
+    value: postgres://$(POSTGRESQL_USERNAME):$(POSTGRESQL_PASSWORD)@postgres-slo.{{ .Release.Namespace }}.svc.cluster.local:5432/$(POSTGRESQL_DATABASE)
+  - type: value
+    name: drop_schema
+    value: "true"
+  - type: value
+    name: service_port
+    value: "1337"
+  - type: secret
+    name: postgresql_username
+    secret: "{{ $.Values.postgres.credentials.secret_name }}"
+    key: username
+  - type: secret
+    name: postgresql_password
+    secret: "{{ $.Values.postgres.credentials.secret_name }}"
+    key: password
+  - type: secret
+    name: postgresql_database
+    secret: "{{ $.Values.postgres.credentials.secret_name }}"
+    key: database
+
 
 sidecar:
   version: 0.7.1

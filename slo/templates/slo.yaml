@@ -27,27 +27,19 @@ spec:
         - name: internal
           containerPort: 1337
         env:
-        - name: POSTGRESQL_USERNAME
+    {{- range $envvar := .Values.slo.envvars }}
+      {{- $envName := $envvar.name | upper | replace "." "_" | replace "-" "_" }}
+        {{- if eq $envvar.type "secret" }}
+        - name: {{ $envName }}
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.postgres.credentials.secret_name }}
-              key: username
-        - name: POSTGRESQL_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.postgres.credentials.secret_name }}
-              key: password
-        - name: POSTGRESQL_DATABASE
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.postgres.credentials.secret_name }}
-              key: database 
-        - name: DATABASE_URI
-          value: postgres://$(POSTGRESQL_USERNAME):$(POSTGRESQL_PASSWORD)@postgres-slo.{{ .Release.Namespace }}.svc.cluster.local:5432/$(POSTGRESQL_DATABASE)
-        - name: DROP_SCHEMA
-          value: "true"
-        - name: SERVICE_PORT
-          value: "1337"
+              name: {{ tpl $envvar.secret $ }}
+              key: {{ $envvar.key }}
+        {{- else if eq $envvar.type "value" }}
+        - name: {{ $envName }}
+          value: {{ tpl $envvar.value $ | quote }}
+        {{- end }}
+    {{- end  }} 
         {{- if .Values.postgres.ssl.enabled  }}
         - name: "SSL_ENABLED"
           value: {{ .Values.postgres.ssl.enabled | quote }}
