@@ -200,9 +200,11 @@ node('ubuntu-18.04'){
         if (warnings.size() > 0) {
             String warnMessage = warnings.join("\n")
             sendWarning(warnMessage)
+            gitStatus("error")
         }
         else{
             println "Successfully completed the jenkins pipeline"
+            gitStatus("success")
             // sendSuccess("Successfully Packaged Helm Charts")
         }
     }
@@ -210,6 +212,7 @@ node('ubuntu-18.04'){
         echo "Caught: ${e}"
         currentBuild.result = 'FAILURE'
         sendFailure("Error caught: ${e}")
+        gitStatus("failure")
         throw e
     } 
 }
@@ -298,5 +301,34 @@ def sendFailure(errMessage) {
                         ]
                 ]
         )
+    }
+}
+
+// error, failure, pending, or success
+def gitStatus(status){
+    // commitId
+    def repo=helm-charts
+    withCredentials([string(credentialsId: 'jenkins-github-status-token', variable: 'TOKEN')]) {
+        // create a status
+        sh """
+            set -eu 
+            user=decipherservices
+            repo=helm-charts
+            commit=${commitId}   # 40 character SHA1
+            token=${TOKEN}
+            domain=https://api.github.com 
+
+            oauth() { 
+                curl -sSH "Authorization: token $token" "$@"
+            } 
+            echo "-----------Create A Status: -----------"
+            # create a status
+            oauth -d '{"state":"success"}' $domain/repos/$user/$repo/statuses/$commit
+            echo "----------END- Create A Status"
+            
+            echo "-----------List Statuses: -----------"
+            # # list statuses
+            oauth $domain/repos/$user/$repo/commits/$commit/statuses
+        """
     }
 }
