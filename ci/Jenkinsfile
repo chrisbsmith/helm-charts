@@ -133,12 +133,12 @@ node('ubuntu-18.04'){
                 try{
                     sh """
                         echo "Packaging: Grey Matter"
-                        ./helm/helm dependency update greymatter
+                        ./helm/helm dependency update decipher/greymatter
                         ./helm/helm package greymatter
                     """
                 }
                 catch (e){
-                    errMessage = "WARN: Greymatter failed to package [Stage- Pachage Grey Matter]"
+                    errMessage = "WARN: Greymatter failed to package [Stage- Pachage Grey Matter (master)]"
                     warnings.add(errMessage)
                     currentBuild.result = 'UNSTABLE'
                 }
@@ -163,6 +163,9 @@ node('ubuntu-18.04'){
                 }
             }
         }
+        //////////////////////////
+        // NOT MASTER BRANCH //////
+        ////////////////////////
         else {
             stage ('Publish Charts to Staging') {
                 try{
@@ -178,7 +181,7 @@ node('ubuntu-18.04'){
                     }
                 }
                 catch (e){
-                    errMessage = "WARN: failed to publish some or all sub charts [Stage- Publish Charts to Staging]"
+                    errMessage = "WARN: failed to publish some or all sub charts [Stage- Publish Charts to Staging (${branch})]"
                     warnings.add(errMessage)
                     currentBuild.result = 'UNSTABLE'
                 }
@@ -195,12 +198,12 @@ node('ubuntu-18.04'){
                     sh """
                         sed -i "s/helm-hosted/helm-staging/g" greymatter/requirements.yaml
                         echo "Packaging: Grey Matter"
-                        ./helm/helm dependency update greymatter
+                        ./helm/helm dependency update decipher-staging/greymatter
                         ./helm/helm package greymatter
                     """
                 }
                 catch (e){
-                    errMessage = "WARN: failed to package Grey Matter [Stage- Package Grey Matter from Staging]"
+                    errMessage = "WARN: failed to package Grey Matter [Stage- Package Grey Matter from Staging (${branch})]"
                     warnings.add(errMessage)
                     currentBuild.result = 'UNSTABLE'
                 }
