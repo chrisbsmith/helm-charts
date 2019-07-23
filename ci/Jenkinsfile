@@ -133,7 +133,7 @@ node('ubuntu-18.04'){
                 try{
                     sh """
                         echo "Packaging: Grey Matter"
-                        ./helm/helm dependency update decipher/greymatter
+                        ./helm/helm dependency update greymatter
                         ./helm/helm package greymatter
                     """
                 }
@@ -198,7 +198,7 @@ node('ubuntu-18.04'){
                     sh """
                         sed -i "s/helm-hosted/helm-staging/g" greymatter/requirements.yaml
                         echo "Packaging: Grey Matter"
-                        ./helm/helm dependency update decipher-staging/greymatter
+                        ./helm/helm dependency update greymatter
                         ./helm/helm package greymatter
                     """
                 }
