@@ -171,11 +171,21 @@ node('ubuntu-18.04'){
         else {
             stage ('Publish Charts to Staging') {
                 try{
+                    // Need to point the Grey Matter requirements to the staging environment then package
+                    withCredentials([usernamePassword(credentialsId: 'jenkins-nexus', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    sh """
+                        ./helm/helm repo add decipher-staging https://nexus.production.deciphernow.com/repository/helm-staging/ --username ${USERNAME} --password ${PASSWORD}
+                    """
                     // Find all of the charts that were created, known by the *.tgz file extension.  Then upload them to Nexus
                     withCredentials([usernamePassword(credentialsId: 'jenkins-nexus', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                             sh '''#!/bin/bash
                                 toPublish=($(ls *.tgz))
                                 for pubChart in ${toPublish[@]}; do
+                                    mkdir temp && cd temp
+                                    helm fetch decipher-staging/$pubChart
+                                    sha1sum $pubChart
+                                    cd ..
+                                    # add logic to hold that value and compare it to the one built
                                     echo "Publishing $pubChart to Staging"
                                     curl -u ${USERNAME}:${PASSWORD} https://nexus.production.deciphernow.com/repository/helm-staging/ -T $pubChart -s
                                 done
@@ -192,11 +202,11 @@ node('ubuntu-18.04'){
 
             stage ('Package Grey Matter from Staging') {
                 try{
-                    // Need to point the Grey Matter requirements to the staging environment then package
-                    withCredentials([usernamePassword(credentialsId: 'jenkins-nexus', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                    sh """
-                        ./helm/helm repo add decipher-staging https://nexus.production.deciphernow.com/repository/helm-staging/ --username ${USERNAME} --password ${PASSWORD}
-                    """
+                    // // Need to point the Grey Matter requirements to the staging environment then package
+                    // withCredentials([usernamePassword(credentialsId: 'jenkins-nexus', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    // sh """
+                    //     ./helm/helm repo add decipher-staging https://nexus.production.deciphernow.com/repository/helm-staging/ --username ${USERNAME} --password ${PASSWORD}
+                    // """
                     }
                     sh """
                         sed -i "s/helm-hosted/helm-staging/g" greymatter/requirements.yaml
