@@ -176,6 +176,7 @@ node('ubuntu-18.04'){
                     sh """
                         ./helm/helm repo add decipher-staging https://nexus.production.deciphernow.com/repository/helm-staging/ --username ${USERNAME} --password ${PASSWORD}
                     """
+                    }
                     // Find all of the charts that were created, known by the *.tgz file extension.  Then upload them to Nexus
                     withCredentials([usernamePassword(credentialsId: 'jenkins-nexus', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                             sh '''#!/bin/bash
