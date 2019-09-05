@@ -59,7 +59,7 @@ node('ubuntu-18.04'){
          try {
             stage ('Install Helm') {
                 sh """
-                    curl -L https://storage.googleapis.com/kubernetes-helm/helm-v${helmVersion}-linux-amd64.tar.gz -o helm-v${helmVersion}-linux-amd64.tar.gz
+                    curl -L https://storage.googleapis.com/kubernetes-helm/helm-v${helmVersion}-linux-amd64.tar.gz -o helm-v${helmVersion}-linux-amd64.tar.gz -s
                     mkdir ./helm
                     tar -zxvf helm-v${helmVersion}-linux-amd64.tar.gz -C ./helm --strip-components=1
                 """
@@ -116,7 +116,8 @@ node('ubuntu-18.04'){
                         sh '''#!/bin/bash
                             toPublish=($(ls *.tgz))
                             for pubChart in ${toPublish[@]}; do
-                                curl -u ${USERNAME}:${PASSWORD} https://nexus.production.deciphernow.com/repository/helm-hosted/ -T $pubChart
+                                echo "Publishing $pubChart:"
+                                curl -u ${USERNAME}:${PASSWORD} https://nexus.production.deciphernow.com/repository/helm-hosted/ -T $pubChart -s
                             done
                             rm -f *.tgz
                         '''
@@ -153,7 +154,8 @@ node('ubuntu-18.04'){
                         sh '''#!/bin/bash
                             toPublish=($(ls greymatter*.tgz))
                             for pubChart in ${toPublish[@]}; do
-                                curl -u ${USERNAME}:${PASSWORD} https://nexus.production.deciphernow.com/repository/helm-hosted/ -T $pubChart
+                                echo "Publishing $pubChart:"
+                                curl -u ${USERNAME}:${PASSWORD} https://nexus.production.deciphernow.com/repository/helm-hosted/ -T $pubChart -s
                             done
                             rm -f *.tgz
                         '''
@@ -174,7 +176,8 @@ node('ubuntu-18.04'){
                             sh '''#!/bin/bash
                                 toPublish=($(ls *.tgz))
                                 for pubChart in ${toPublish[@]}; do
-                                    curl -u ${USERNAME}:${PASSWORD} https://nexus.production.deciphernow.com/repository/helm-staging/ -T $pubChart
+                                    echo "Publishing $pubChart:"
+                                    curl -u ${USERNAME}:${PASSWORD} https://nexus.production.deciphernow.com/repository/helm-staging/ -T $pubChart -s
                                 done
                                 rm -f *.tgz
                             '''
