@@ -183,7 +183,7 @@ node('ubuntu-18.04'){
                                 toPublish=($(ls *.tgz))
                                 for pubChart in ${toPublish[@]}; do
                                     mkdir temp && cd temp
-                                    helm fetch decipher-staging/$pubChart
+                                    ./helm/helm fetch decipher-staging/$pubChart
                                     sha1sum $pubChart
                                     cd ..
                                     # add logic to hold that value and compare it to the one built
