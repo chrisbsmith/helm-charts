@@ -174,7 +174,7 @@ node('ubuntu-18.04'){
                     // Need to point the Grey Matter requirements to the staging environment then package
                     withCredentials([usernamePassword(credentialsId: 'jenkins-nexus', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                     sh """
-                        ./helm/helm repo add decipher-staging https://nexus.production.deciphernow.com/repository/helm-staging/ --username ${USERNAME} --password ${PASSWORD}
+                        ./helm/helm repo add decipher-staging https://nexus.production.deciphernow.com/repository/helm-staging/ --username ${USERNAME} --password ${PASSWORD} -s
                     """
                     }
                     // Find all of the charts that were created, known by the *.tgz file extension.  Then upload them to Nexus
