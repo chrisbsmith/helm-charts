@@ -39,6 +39,17 @@ minikube:
 	helm install decipher/greymatter -f greymatter.yaml -f greymatter-secrets.yaml -f credentials.yaml --set global.environment=kubernetes -n gm-deploy
 	./ci/scripts/show-voyager.sh
 
+aws: credentials
+	sudo /home/ubuntu/bin/minikube start --memory 6144 --cpus 6
+	sudo chown -R $USER $HOME/.minikube $HOME/.kube
+	helm init --wait
+	./ci/scripts/install-voyager.sh
+	helm install decipher/greymatter -f greymatter.yaml -f greymatter-secrets.yaml -f credentials.yaml --set global.environment=kubernetes -n gm-deploy
+	./ci/scripts/show-voyager.sh
+
+destroyAWS:
+	/home/ubuntu/bin/minikube delete
+
 destroy:
 	minikube delete -p gm-deploy
 

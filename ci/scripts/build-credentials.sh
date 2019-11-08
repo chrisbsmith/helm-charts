@@ -30,4 +30,6 @@ export ACCESS
 export SECRET
 export REGION
 export BUCKET
+helm init --client-only
+helm repo add decipher https://nexus.production.deciphernow.com/repository/helm-hosted --username $EMAIL --password $PASSWORD
 envsubst < $TEMPLATE > ../../credentials.yaml
