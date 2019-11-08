@@ -45,7 +45,7 @@ awsfresh: credentials
 	helm init --wait
 	./ci/scripts/install-voyager.sh
 	helm install decipher/greymatter -f greymatter.yaml -f greymatter-secrets.yaml -f credentials.yaml --set global.environment=kubernetes -n gm-deploy
-	./ci/scripts/show-voyager.sh
+	./ci/scripts/show-voyager.sh aws
 
 aws:
 	sudo /home/ubuntu/bin/minikube start --memory 6144 --cpus 6
@@ -53,7 +53,7 @@ aws:
 	helm init --wait
 	./ci/scripts/install-voyager.sh
 	helm install decipher/greymatter -f greymatter.yaml -f greymatter-secrets.yaml -f credentials.yaml --set global.environment=kubernetes -n gm-deploy
-	./ci/scripts/show-voyager.sh
+	./ci/scripts/show-voyager.sh aws
 
 destroyAWS:
 	sudo /home/ubuntu/bin/minikube delete
