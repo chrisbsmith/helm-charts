@@ -1,0 +1,14 @@
+name: Helm Package
+
+on:
+  push:
+    branches:
+      - git-actions
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: flydiverny/helm-package-action@master
+        with:
+          args: ./greymatter
