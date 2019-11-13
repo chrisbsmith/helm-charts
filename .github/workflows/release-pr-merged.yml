@@ -158,7 +158,7 @@ jobs:
         uses: rtCamp/action-slack-notify@master
   NotifySlackFailure:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true && success()
+    if: github.event.pull_request.merged == true && failure()
     needs: PackageGreyMatter
     steps:
       - name: Slack notification
