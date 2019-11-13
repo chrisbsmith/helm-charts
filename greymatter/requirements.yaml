@@ -1,42 +1,42 @@
 dependencies:
   - name: catalog
     version: '2.1.0'
-    repository: 'https://nexus.production.deciphernow.com/repository/helm-hosted'
+    repository: 'https://nexus.production.deciphernow.com/repository/helm-wrongonpurpose'
 
   - name: data
     version: '2.1.1'
-    repository: 'https://nexus.production.deciphernow.com/repository/helm-hosted'
+    repository: 'https://nexus.production.deciphernow.com/repository/helm-wrongonpurpose'
     alias: internal-data
 
     
   - name: data
     version: '2.1.1'
-    repository: 'https://nexus.production.deciphernow.com/repository/helm-hosted'
+    repository: 'https://nexus.production.deciphernow.com/repository/helm-wrongonpurpose'
 
 
   - name: dashboard
     version: '2.1.0'
-    repository: 'https://nexus.production.deciphernow.com/repository/helm-hosted'
+    repository: 'https://nexus.production.deciphernow.com/repository/helm-wrongonpurpose'
 
   - name: edge
     version: '2.1.0'
-    repository: 'https://nexus.production.deciphernow.com/repository/helm-hosted'
+    repository: 'https://nexus.production.deciphernow.com/repository/helm-wrongonpurpose'
 
   - name: jwt
     version: '2.1.0'
-    repository: 'https://nexus.production.deciphernow.com/repository/helm-hosted'
+    repository: 'https://nexus.production.deciphernow.com/repository/helm-wrongonpurpose'
 
   - name: jwt
     version: '2.1.0'
-    repository: 'https://nexus.production.deciphernow.com/repository/helm-hosted'
+    repository: 'https://nexus.production.deciphernow.com/repository/helm-wrongonpurpose'
     alias: internal-jwt
 
   - name: slo
     version: '2.1.0'
-    repository: 'https://nexus.production.deciphernow.com/repository/helm-hosted'
+    repository: 'https://nexus.production.deciphernow.com/repository/helm-wrongonpurpose'
 
   - name: gm-control-api
-    repository: 'https://nexus.production.deciphernow.com/repository/helm-hosted'
+    repository: 'https://nexus.production.deciphernow.com/repository/helm-wrongonpurpose'
     version: '2.1.0'
 
   - name: control
