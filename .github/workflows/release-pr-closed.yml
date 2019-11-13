@@ -1,7 +1,11 @@
-name: Grey Matter Helm Package Release
+# This workflow is meant to run when a PR is closed, or merged.  It will attempt to
+# package and push all charts to Decipher's hosted repository.
+
+name: Grey Matter Release to Hosted
 
 on:
   pull_request:
+    types: [closed]
     branches:
       - 'release-**'
 
@@ -11,7 +15,7 @@ jobs:
     steps:
       - name: Test a PR
         run: |
-          echo "This is a test of the PR"
+          echo "PR has been closed"
   # PackageCatalog:
   #   runs-on: ubuntu-latest
   #   steps:
@@ -19,7 +23,7 @@ jobs:
   #     - name: Package Catalog
   #       uses: chrisbsmith/greymatter-helm-action@master
   #       with:
-  #         NEXUS_URL: https://nexus.production.deciphernow.com/repository/helm-staging/
+  #         NEXUS_URL: https://nexus.production.deciphernow.com/repository/helm-hosted/
   #         NEXUS_USER: ${{ secrets.NEXUS_USER }}
   #         NEXUS_PASS: ${{ secrets.NEXUS_PASS }}
   #         args: ./catalog
@@ -30,7 +34,7 @@ jobs:
   #     - name: Package Control
   #       uses: chrisbsmith/greymatter-helm-action@master
   #       with:
-  #         NEXUS_URL: https://nexus.production.deciphernow.com/repository/helm-staging/
+  #         NEXUS_URL: https://nexus.production.deciphernow.com/repository/helm-hosted/
   #         NEXUS_USER: ${{ secrets.NEXUS_USER }}
   #         NEXUS_PASS: ${{ secrets.NEXUS_PASS }}
   #         args: ./control
@@ -41,7 +45,7 @@ jobs:
   #     - name: Package Control
   #       uses: chrisbsmith/greymatter-helm-action@master
   #       with:
-  #         NEXUS_URL: https://nexus.production.deciphernow.com/repository/helm-staging/
+  #         NEXUS_URL: https://nexus.production.deciphernow.com/repository/helm-hosted/
   #         NEXUS_USER: ${{ secrets.NEXUS_USER }}
   #         NEXUS_PASS: ${{ secrets.NEXUS_PASS }}
   #         args: ./gm-control-api
@@ -52,7 +56,7 @@ jobs:
   #     - name: Package Control
   #       uses: chrisbsmith/greymatter-helm-action@master
   #       with:
-  #         NEXUS_URL: https://nexus.production.deciphernow.com/repository/helm-staging/
+  #         NEXUS_URL: https://nexus.production.deciphernow.com/repository/helm-hosted/
   #         NEXUS_USER: ${{ secrets.NEXUS_USER }}
   #         NEXUS_PASS: ${{ secrets.NEXUS_PASS }}
   #         args: ./dashboard
@@ -63,10 +67,21 @@ jobs:
   #     - name: Package Control
   #       uses: chrisbsmith/greymatter-helm-action@master
   #       with:
-  #         NEXUS_URL: https://nexus.production.deciphernow.com/repository/helm-staging/
+  #         NEXUS_URL: https://nexus.production.deciphernow.com/repository/helm-hosted/
   #         NEXUS_USER: ${{ secrets.NEXUS_USER }}
   #         NEXUS_PASS: ${{ secrets.NEXUS_PASS }}
   #         args: ./jwt
+  # PackageJWT:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v1
+  #     - name: Package Control
+  #       uses: chrisbsmith/greymatter-helm-action@master
+  #       with:
+  #         NEXUS_URL: https://nexus.production.deciphernow.com/repository/helm-government/
+  #         NEXUS_USER: ${{ secrets.NEXUS_USER }}
+  #         NEXUS_PASS: ${{ secrets.NEXUS_PASS }}
+  #         args: ./jwt-gov
   # PackageData:
   #   runs-on: ubuntu-latest
   #   steps:
@@ -74,7 +89,7 @@ jobs:
   #     - name: Package Control
   #       uses: chrisbsmith/greymatter-helm-action@master
   #       with:
-  #         NEXUS_URL: https://nexus.production.deciphernow.com/repository/helm-staging/
+  #         NEXUS_URL: https://nexus.production.deciphernow.com/repository/helm-hosted/
   #         NEXUS_USER: ${{ secrets.NEXUS_USER }}
   #         NEXUS_PASS: ${{ secrets.NEXUS_PASS }}
   #         args: ./data
@@ -85,7 +100,7 @@ jobs:
   #     - name: Package Control
   #       uses: chrisbsmith/greymatter-helm-action@master
   #       with:
-  #         NEXUS_URL: https://nexus.production.deciphernow.com/repository/helm-staging/
+  #         NEXUS_URL: https://nexus.production.deciphernow.com/repository/helm-hosted/
   #         NEXUS_USER: ${{ secrets.NEXUS_USER }}
   #         NEXUS_PASS: ${{ secrets.NEXUS_PASS }}
   #         args: ./edge
@@ -96,7 +111,7 @@ jobs:
   #     - name: Package Control
   #       uses: chrisbsmith/greymatter-helm-action@master
   #       with:
-  #         NEXUS_URL: https://nexus.production.deciphernow.com/repository/helm-staging/
+  #         NEXUS_URL: https://nexus.production.deciphernow.com/repository/helm-hosted/
   #         NEXUS_USER: ${{ secrets.NEXUS_USER }}
   #         NEXUS_PASS: ${{ secrets.NEXUS_PASS }}
   #         args: ./slo
@@ -119,19 +134,34 @@ jobs:
   #     - name: Package Grey Matter
   #       uses: chrisbsmith/greymatter-helm-action@master
   #       with:
-  #         NEXUS_URL: https://nexus.production.deciphernow.com/repository/helm-staging/
+  #         NEXUS_URL: https://nexus.production.deciphernow.com/repository/helm-hosted/
   #         NEXUS_USER: ${{ secrets.NEXUS_USER }}
   #         NEXUS_PASS: ${{ secrets.NEXUS_PASS }}
   #         args: ./greymatter
-  # NotifySlack:
+  # NotifySlackSuccess:
   #   runs-on: ubuntu-latest
+  #   if: success()
   #   needs: PackageGreyMatter
   #   steps:
   #     - name: Slack notification
   #       env:
   #         SLACK_CHANNEL: 'decipher-sres-bots'
   #         SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-  #         SLACK_USERNAME: GitHubActions # Optional.
+  #         SLACK_USERNAME: GitHubActions
   #         SLACK_ICON: https://raw.githubusercontent.com/quintessence/slack-icons/master/images/github-logo-slack-icon.png
-  #         SLACK_MESSAGE: 'Grey Matter Helm charts released to Staging'
+  #         SLACK_MESSAGE: 'Grey Matter Helm charts released to Hosted'
+  #       uses: rtCamp/action-slack-notify@master
+  # NotifySlackFailure:
+  #   runs-on: ubuntu-latest
+  #   if: failure()
+  #   needs: PackageGreyMatter
+  #   steps:
+  #     - name: Slack notification
+  #       env:
+  #         SLACK_CHANNEL: 'decipher-sres-bots'
+  #         SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+  #         SLACK_USERNAME: GitHubActions
+  #         SLACK_ICON: https://raw.githubusercontent.com/quintessence/slack-icons/master/images/github-logo-slack-icon.png
+  #         SLACK_MESSAGE: 'Grey Matter Helm charts failed to released to Hosted'
+  #         SLACK_COLOR: '#FF0000'
   #       uses: rtCamp/action-slack-notify@master
