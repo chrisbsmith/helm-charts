@@ -3,6 +3,9 @@
 
 name: Grey Matter Release to Staging
 
+env:
+  ACTION_STATE: 'success'
+
 on:
   pull_request:
     types: [opened]
@@ -21,8 +24,13 @@ jobs:
           NEXUS_USER: ${{ secrets.NEXUS_USER }}
           NEXUS_PASS: ${{ secrets.NEXUS_PASS }}
           args: ./catalog
+      - name: Set Status
+        run: |
+          echo "::set-env name=ACTION_STATE::${{ job.status }}"
+          echo "$ACTION_STATE"
   PackageControl:
     runs-on: ubuntu-latest
+    if: success()
     steps:
       - uses: actions/checkout@v1
       - name: Package Control
@@ -32,8 +40,13 @@ jobs:
           NEXUS_USER: ${{ secrets.NEXUS_USER }}
           NEXUS_PASS: ${{ secrets.NEXUS_PASS }}
           args: ./control
+      - name: Set Status
+        run: |
+          echo "::set-env name=ACTION_STATE::${{ job.status }}"
+          echo "$ACTION_STATE"
   PackageControlAPI:
     runs-on: ubuntu-latest
+    if: success()
     steps:
       - uses: actions/checkout@v1
       - name: Package Control
@@ -43,8 +56,13 @@ jobs:
           NEXUS_USER: ${{ secrets.NEXUS_USER }}
           NEXUS_PASS: ${{ secrets.NEXUS_PASS }}
           args: ./gm-control-api
+      - name: Set Status
+        run: |
+          echo "::set-env name=ACTION_STATE::${{ job.status }}"
+          echo "$ACTION_STATE"
   PackageDashboard:
     runs-on: ubuntu-latest
+    if: success()
     steps:
       - uses: actions/checkout@v1
       - name: Package Control
@@ -54,8 +72,13 @@ jobs:
           NEXUS_USER: ${{ secrets.NEXUS_USER }}
           NEXUS_PASS: ${{ secrets.NEXUS_PASS }}
           args: ./dashboard
+      - name: Set Status
+        run: |
+          echo "::set-env name=ACTION_STATE::${{ job.status }}"
+          echo "$ACTION_STATE"
   PackageJWT:
     runs-on: ubuntu-latest
+    if: success()
     steps:
       - uses: actions/checkout@v1
       - name: Package Control
@@ -65,8 +88,13 @@ jobs:
           NEXUS_USER: ${{ secrets.NEXUS_USER }}
           NEXUS_PASS: ${{ secrets.NEXUS_PASS }}
           args: ./jwt
+      - name: Set Status
+        run: |
+          echo "::set-env name=ACTION_STATE::${{ job.status }}"
+          echo "$ACTION_STATE"
   PackageJWTGov:
     runs-on: ubuntu-latest
+    if: success()
     steps:
       - uses: actions/checkout@v1
       - name: Package Control
@@ -76,8 +104,13 @@ jobs:
           NEXUS_USER: ${{ secrets.NEXUS_USER }}
           NEXUS_PASS: ${{ secrets.NEXUS_PASS }}
           args: ./jwt-gov
+      - name: Set Status
+        run: |
+          echo "::set-env name=ACTION_STATE::${{ job.status }}"
+          echo "$ACTION_STATE"
   PackageData:
     runs-on: ubuntu-latest
+    if: success()
     steps:
       - uses: actions/checkout@v1
       - name: Package Control
@@ -87,8 +120,13 @@ jobs:
           NEXUS_USER: ${{ secrets.NEXUS_USER }}
           NEXUS_PASS: ${{ secrets.NEXUS_PASS }}
           args: ./data
+      - name: Set Status
+        run: |
+          echo "::set-env name=ACTION_STATE::${{ job.status }}"
+          echo "$ACTION_STATE"
   PackageEdge:
     runs-on: ubuntu-latest
+    if: success()
     steps:
       - uses: actions/checkout@v1
       - name: Package Control
@@ -98,8 +136,13 @@ jobs:
           NEXUS_USER: ${{ secrets.NEXUS_USER }}
           NEXUS_PASS: ${{ secrets.NEXUS_PASS }}
           args: ./edge
+      - name: Set Status
+        run: |
+          echo "::set-env name=ACTION_STATE::${{ job.status }}"
+          echo "$ACTION_STATE"
   PackageSlo:
     runs-on: ubuntu-latest
+    if: success()
     steps:
       - uses: actions/checkout@v1
       - name: Package Control
@@ -109,6 +152,10 @@ jobs:
           NEXUS_USER: ${{ secrets.NEXUS_USER }}
           NEXUS_PASS: ${{ secrets.NEXUS_PASS }}
           args: ./slo
+      - name: Set Status
+        run: |
+          echo "::set-env name=ACTION_STATE::${{ job.status }}"
+          echo "$ACTION_STATE"
   PackageGreyMatter:
     runs-on: ubuntu-latest
     if: success()
@@ -127,6 +174,9 @@ jobs:
       ]
     steps:
       - uses: actions/checkout@v1
+      - name: Point to Staging
+        run: |
+          sed -i "s/helm-hosted/helm-staging/g" greymatter/requirements.yaml
       - name: Package Grey Matter
         uses: chrisbsmith/greymatter-helm-action@master
         with:
@@ -134,6 +184,10 @@ jobs:
           NEXUS_USER: ${{ secrets.NEXUS_USER }}
           NEXUS_PASS: ${{ secrets.NEXUS_PASS }}
           args: ./greymatter
+      - name: Set Status
+        run: |
+          echo "::set-env name=ACTION_STATE::${{ job.status }}"
+          echo "$ACTION_STATE"
   NotifySlackSuccess:
     runs-on: ubuntu-latest
     if: success()
